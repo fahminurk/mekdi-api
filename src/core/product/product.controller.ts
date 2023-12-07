@@ -1,34 +1,49 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { Prisma } from '@prisma/client';
 
-@Controller('product')
+@Controller('products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
-  }
-
   @Get()
-  findAll() {
-    return this.productService.findAll();
+  getAllProduct() {
+    return this.productService.getAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  getProductById(@Param('id') id: string) {
+    return this.productService.getById(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto);
+  @Post()
+  async createProduct(@Body() data: Prisma.ProductCreateInput) {
+    return this.productService.create(data);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  async deleteCategory(@Param('id') id: string) {
+    const checkCategory = await this.productService.getById(id);
+    if (!checkCategory) throw new NotFoundException('Category not found');
+    return this.productService.delete(id);
+  }
+
+  @Patch(':id')
+  async updateCategory(
+    @Param('id') id: string,
+    @Body() data: Prisma.ProductUpdateInput,
+  ) {
+    const checkCategory = await this.productService.getById(id);
+    if (!checkCategory) throw new NotFoundException('Category not found');
+    return this.productService.update(id, data);
   }
 }
