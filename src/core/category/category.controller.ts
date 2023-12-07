@@ -1,34 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  NotFoundException,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Prisma } from '@prisma/client';
+import { CreateCategoryDto } from './dto/category.dto';
 
-@Controller('category')
+@Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
-  }
-
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  getAllCategory() {
+    return this.categoryService.getAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
+  getCategoryById(@Param('id') id: string) {
+    return this.categoryService.getById(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryService.update(+id, updateCategoryDto);
+  @Post()
+  async createCategory(@Body() data: CreateCategoryDto) {
+    return this.categoryService.create(data);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
+  async deleteCategory(@Param('id') id: string) {
+    const checkCategory = await this.categoryService.getById(id);
+    if (!checkCategory) throw new NotFoundException('Category not found');
+    return this.categoryService.delete(id);
+  }
+
+  @Patch(':id')
+  async updateCategory(
+    @Param('id') id: string,
+    @Body() data: Prisma.CategoryUpdateInput,
+  ) {
+    const checkCategory = await this.categoryService.getById(id);
+    if (!checkCategory) throw new NotFoundException('Category not found');
+    return this.categoryService.update(id, data);
   }
 }
