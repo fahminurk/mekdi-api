@@ -1,11 +1,48 @@
-import { IsEmail, IsString, IsNotEmpty, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsNotEmpty,
+  Length,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 
-export class GetAllDto {
+export class CreateUserDto {
   @IsEmail()
-  public email: string;
+  @IsNotEmpty()
+  email: string;
 
   @IsString()
-  public name: string;
+  @IsNotEmpty()
+  @Length(6)
+  password: string;
 
-  public password: string;
+  @IsString()
+  @IsNotEmpty()
+  fullname: string;
+
+  isSuperAdmin?: boolean;
+}
+
+export class UpdateUserDto {
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @IsString()
+  @IsOptional()
+  fullname?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isSuperAdmin?: boolean;
+}
+
+export class GetUserDTO {
+  id: string;
+  email: string;
+  fullname: string;
+  isSuperAdmin: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }

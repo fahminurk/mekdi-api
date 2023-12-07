@@ -10,10 +10,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Prisma } from '@prisma/client';
 import { hash } from 'bcrypt';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -28,7 +28,7 @@ export class UserController {
   }
 
   @Post()
-  async createUser(@Body() data: Prisma.UserCreateInput) {
+  async createUser(@Body() data: CreateUserDto) {
     const checkUser = await this.userService.getByEmail(data.email);
 
     if (checkUser) throw new UnauthorizedException('User already exists');
@@ -37,10 +37,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  async updateUser(
-    @Body() data: Prisma.UserUpdateInput,
-    @Param('id') id: string,
-  ) {
+  async updateUser(@Body() data: UpdateUserDto, @Param('id') id: string) {
     const checkUser = await this.userService.getById(id);
     if (!checkUser) throw new NotFoundException('User not found');
 
